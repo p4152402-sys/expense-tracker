@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-# Page config
 st.set_page_config(page_title="Expense Tracker", page_icon="💰", layout="centered")
 
 # Custom CSS
@@ -10,23 +9,11 @@ st.markdown("""
 body {
     background-color: #f5f7fa;
 }
-.main {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-}
 h1 {
     text-align: center;
-    color: #333;
 }
 .stButton>button {
     background: linear-gradient(to right, #4CAF50, #2e7d32);
-    color: white;
-    border-radius: 8px;
-    padding: 8px 16px;
-}
-.stDownloadButton>button {
-    background: linear-gradient(to right, #2196F3, #1565C0);
     color: white;
     border-radius: 8px;
 }
@@ -35,11 +22,11 @@ h1 {
 
 st.title("💰 Expense Tracker")
 
-# Initialize data
+# Store data
 if "data" not in st.session_state:
     st.session_state.data = []
 
-# Layout (2 columns)
+# Input section
 col1, col2 = st.columns(2)
 
 with col1:
@@ -62,21 +49,32 @@ if st.button("➕ Add Expense"):
 df = pd.DataFrame(st.session_state.data)
 
 st.markdown("---")
-st.subheader("📊 Expense Dashboard")
+st.subheader("📊 Dashboard")
 
 if not df.empty:
-    # Total card
+    # Total
     total = df["Amount"].sum()
     st.metric("Total Expense", f"₹ {total}")
 
     # Filter
-    filter_cat = st.selectbox("Filter by Category", ["All", "Food", "Travel", "Shopping", "Other"])
-
+    filter_cat = st.selectbox("Filter", ["All", "Food", "Travel", "Shopping", "Other"])
     if filter_cat != "All":
         df = df[df["Category"] == filter_cat]
 
     # Table
     st.dataframe(df, use_container_width=True)
+
+    # 📊 Charts Section
+    st.subheader("📈 Insights")
+
+    # Category-wise sum
+    cat_data = df.groupby("Category")["Amount"].sum()
+
+    st.write("Category-wise Expenses")
+    st.bar_chart(cat_data)
+
+    st.write("Expense Distribution")
+    st.line_chart(cat_data)
 
     # Download
     st.download_button("📥 Download Report", df.to_csv(index=False), "expenses.csv")
